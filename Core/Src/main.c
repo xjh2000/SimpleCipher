@@ -17,10 +17,10 @@
   */
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
-
 #include "main.h"
 #include "usart.h"
 #include "gpio.h"
+#include "ds18b20.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -64,7 +64,25 @@ void SystemClock_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+void delay_us(uint32_t u_delay) {
+    uint32_t start_val, tick_n, delay_n, wait_n;
 
+    start_val = SysTick->VAL;
+    tick_n = HAL_GetTick();
+    // sys_clock = 168000;  // SystemCoreClock / (1000U / uwTickFreq);
+    delay_n = u_delay * 168; // sys_clock / 1000 * u_delay;
+    // this maybe have a bug when wait_n never equal SysTick->VAL
+    if (delay_n > start_val) {
+        while (HAL_GetTick() == tick_n) {
+        }
+        wait_n = 168000 - (delay_n - start_val);
+        while (wait_n < SysTick->VAL) {}
+    } else {
+        wait_n = start_val - delay_n;
+        while (wait_n < SysTick->VAL && HAL_GetTick() == tick_n) {
+        }
+    }
+}
 /* USER CODE END 0 */
 
 /**
@@ -97,22 +115,26 @@ int main(void) {
     MX_USART1_UART_Init();
     /* USER CODE BEGIN 2 */
 
+    while (DS18B20_Init()) {
+        HAL_Delay(400);
+    }
+
     /* USER CODE END 2 */
 
     /* Infinite loop */
     /* USER CODE BEGIN WHILE */
+    short temperature;
     while (1) {
         /* USER CODE END WHILE */
 
         /* USER CODE BEGIN 3 */
-        printf("i am blinking \r\n");
+        temperature = DS18B20_Get_Temp();
+        printf("temperature is %d.%d \r\n", temperature / 10, temperature % 10);
 
         HAL_GPIO_WritePin(LED0_GPIO_Port, LED0_Pin, GPIO_PIN_RESET);
-        HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, GPIO_PIN_RESET);
-        HAL_Delay(1000);
+        HAL_Delay(500);
         HAL_GPIO_WritePin(LED0_GPIO_Port, LED0_Pin, GPIO_PIN_SET);
-        HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, GPIO_PIN_SET);
-        HAL_Delay(1000);
+        HAL_Delay(500);
 
     }
     /* USER CODE END 3 */

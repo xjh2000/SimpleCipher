@@ -53,6 +53,12 @@ extern "C" {
 void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
+/**
+ * use by SysTick to delay us.
+ * @param u_delay
+ * @note can not over SystemClock / 1000 , no OS version
+ */
+void delay_us(uint32_t u_delay);
 
 /* USER CODE END EFP */
 
