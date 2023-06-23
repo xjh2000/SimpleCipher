@@ -25,6 +25,8 @@
 /* USER CODE BEGIN Includes */
 #include <stdio.h>
 #include "ds18b20.h"
+#include "oled.h"
+#include "des.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -118,19 +120,57 @@ int main(void) {
     while (DS18B20_Init()) {
         HAL_Delay(400);
     }
+    OLED_Init();
 
     /* USER CODE END 2 */
 
     /* Infinite loop */
     /* USER CODE BEGIN WHILE */
-    short temperature;
+
+    uint16_t temperature;
+    uint8_t plaintext_string[30] = {0};
+    uint8_t ciphertext_string[30] = {0};
+    uint8_t temperature_string[30] = {0};
+    uint8_t key[8] = {0x13, 0x34, 0x57, 0x79, 0x9b, 0xbc, 0xdf, 0xf1};
+    uint8_t plainText[9] = {0};
+    uint8_t cipherText[8] = {0};
     while (1) {
         /* USER CODE END WHILE */
 
         /* USER CODE BEGIN 3 */
-        temperature = DS18B20_Get_Temp();
-        printf("temperature is %d.%d \r\n", temperature / 10, temperature % 10);
 
+        temperature = DS18B20_Get_Temp();
+
+        // show temperature
+        sprintf((char *) temperature_string, "Temperature:%d.%d", temperature / 10, temperature % 10);
+
+        OLED_ShowString(10, 0, (const uint8_t *) temperature_string, 12);
+
+        // show plain text
+        sprintf((char *) plaintext_string, "%016x", temperature);
+        sprintf((char *) plainText, "%08x", temperature);
+
+        OLED_ShowString(10, 12, (const uint8_t *) "Plaintext", 12);
+        OLED_ShowString(10, 24, (const uint8_t *) plaintext_string, 12);
+
+        // show cipher text
+
+        // clear cipherText
+        for (int i = 0; i < 8; ++i) {
+            cipherText[i] = 0;
+        }
+        // cipher
+        des_encrypt(plainText, key, cipherText);
+
+        sprintf((char *) ciphertext_string, "%02x%02x%02x%02x%02x%02x%02x%02x", cipherText[0], cipherText[1],
+                cipherText[2], cipherText[3], cipherText[4], cipherText[5], cipherText[6], cipherText[7]);
+
+        OLED_ShowString(10, 36, (const uint8_t *) "Ciphertext", 12);
+        OLED_ShowString(10, 48, (const uint8_t *) ciphertext_string, 12);
+
+        OLED_Refresh_Gram();//更新显示到OLED
+
+        // blink
         HAL_GPIO_WritePin(LED0_GPIO_Port, LED0_Pin, GPIO_PIN_RESET);
         HAL_Delay(500);
         HAL_GPIO_WritePin(LED0_GPIO_Port, LED0_Pin, GPIO_PIN_SET);

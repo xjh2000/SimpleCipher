@@ -31,7 +31,7 @@ extern "C" {
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "stdint.h"
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
@@ -67,8 +67,22 @@ void delay_us(uint32_t u_delay);
 #define LED0_GPIO_Port GPIOF
 #define LED1_Pin GPIO_PIN_10
 #define LED1_GPIO_Port GPIOF
+#define SDA_Pin GPIO_PIN_8
+#define SDA_GPIO_Port GPIOD
+#define SCK_Pin GPIO_PIN_9
+#define SCK_GPIO_Port GPIOD
+#define DC_Pin GPIO_PIN_10
+#define DC_GPIO_Port GPIOD
+#define RST_Pin GPIO_PIN_11
+#define RST_GPIO_Port GPIOD
+#define CS_Pin GPIO_PIN_12
+#define CS_GPIO_Port GPIOD
 
 /* USER CODE BEGIN Private defines */
+
+#define u8 uint8_t
+#define u16 uint16_t
+#define u32 uint32_t
 
 /* USER CODE END Private defines */
 
